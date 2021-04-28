@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <define name="logdir" class="org.tgbot.mathunsinn.logback.LogDirPropertyDefiner"/>
+    <define name="filename" class="org.tgbot.mathunsinn.logback.LogNamePropertyDefiner"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logdir}${file.separator}${filename}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${logdir}${file.separator}main.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize><!-- Режем файлы по 50MB -->
+            <maxHistory>60</maxHistory><!-- Историю храним максимум 60 дней -->
+            <totalSizeCap>500MB</totalSizeCap><!-- Общий размер логов не более 500MB -->
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="asynclogfile" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="logfile" />
+        <queueSize>1024</queueSize>
+        <maxFlushTime>2000</maxFlushTime><!-- Даем максимум 2 секунды на сбрасывание буфера -->
+    </appender>
+
+    <logger name="org.tgbot" level="debug" additivity="false">
+        <appender-ref ref="console" />
+        <appender-ref ref="asynclogfile" />
+    </logger>
+
+    <root level="warn">
+        <appender-ref ref="console" />
+        <appender-ref ref="asynclogfile" />
+    </root>
+
+</configuration>
